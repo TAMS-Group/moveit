@@ -260,6 +260,9 @@ class MoveGroupCommandInterpreter(object):
         if cmd == "current":
             return self.command_current(g)
 
+        if cmd == "current_as_srdf":
+            return self.command_current_as_srdf(g)
+
         if cmd == "ground":
             pose = PoseStamped()
             pose.pose.position.x = 0
@@ -736,6 +739,15 @@ class MoveGroupCommandInterpreter(object):
             )
         return (MoveGroupInfoLevel.INFO, res)
 
+    def command_current_as_srdf(self, g):
+        state= g.get_current_state()
+        res= (
+            '<group_state name="named_state" group="'+g.get_name()+'">\n'+
+            "\n    ".join(['<joint name="{}" value="{}"/>'.format(n,p) for n,p in zip(state.joint_state.name, state.joint_state.position)])+
+            '\n</group_state>'
+            )
+        return (MoveGroupInfoLevel.INFO, res)
+
     def command_go_offset(self, g, offset, factor, dimension_index, direction_name):
         if g.has_end_effector_link():
             try:
@@ -862,6 +874,7 @@ class MoveGroupCommandInterpreter(object):
             "delete": known_vars,
             "database": [],
             "current": [],
+            "current_as_srdf": [],
             "use": groups,
             "load": [],
             "save": [],
